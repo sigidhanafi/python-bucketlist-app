@@ -8,9 +8,9 @@ app.secret_key = 'my secret key'
 
 # MySQL configuration
 mysql = MySQL()
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'ffugm'
-app.config['MYSQL_DATABASE_DB'] = 'db_learnpython_bucketlist'
+app.config['MYSQL_DATABASE_USER'] = 'db user'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'db password'
+app.config['MYSQL_DATABASE_DB'] = 'db name'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
 
