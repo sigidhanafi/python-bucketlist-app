@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bucket List with Flask</title>
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+    <link href="../static/css/font-awesome.css" rel="stylesheet">
+    <script type="text/javascript" src="../static/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <nav>
+                <ul class="nav nav-pills pull-right">
+                    <li role="presentation" class="active"><a href="home">Home</a></li>
+                    <li role="presentation"><a href="addwish">Add Item</a></li>
+                    <li role="presentation"><a href="logout">Logout</a></li>
+                </ul>
+            </nav>
+            <h3 class="text-muted">Bucket List App</h3>
+        </div>
+        <div class="jumbotron">
+            <h1>{{ name }}</h1>
+        </div>
+        <div>
+            {% if data|length > 0 %}
+                <ul class="list-group">
+                    {% for row in data %}
+                        <li class="list-group-item">
+                            {{ row[1] }}
+                            <div class="pull-right col-lg-2 text-right">
+                                <a href="#" class="btn-delete" alt="delete" title="delete" id="{{ row[0] }}" data-toggle="modal" data-target="#myModal"><i class="fa fa-trash" aria-hidden="true"></i></a> &nbsp;
+                                <a href="/editWish?id={{ row[0] }}" class="" alt="edit" title="edit"><i class="fa fa-pencil" aria-hidden="true"></i></a> &nbsp;
+                                <a href="/showWish?id={{ row[0] }}" class="" alt="view" title="view"><i class="fa fa-eye" aria-hidden="true"></i></a> &nbsp;
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    You don't have list items!
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Delete item</h4>
+                    </div>
+                    <div class="modal-body">
+                        Delete this item list forever?
+                        <form id="deleteWish" action="deleteWish" method="POST">
+                            <input type="hidden" name="id" value="" id="wishId">
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary btn-yes">Yes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end Modal -->
+        <footer class="footer">
+            <p>&copy; sigidhanafi 2016</p>
+        </footer>
+    </div>
+</body>
+<script type="text/javascript">
+    $(function(){
+        $(".btn-delete").on('click', function(){
+            var id = $(this).attr("id");
+            $("#wishId").val(id);
+        })
+
+        $(".btn-yes").on('click', function(){
+            $("#deleteWish").submit();
+        })
+    })
+</script>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bucket List with Flask</title>
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+    <script type="text/javascript" src="../static/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <nav>
+                <ul class="nav nav-pills pull-right">
+                    <li role="presentation" class="active"><a href="home">Home</a></li>
+                    <li role="presentation"><a href="/addwish">Add Item</a></li>
+                    <li role="presentation"><a href="logout">Logout</a></li>
+                </ul>
+            </nav>
+            <h3 class="text-muted">Bucket List App</h3>
+        </div>
+        <div class="jumbotron">
+            <h1>Edit your item list!</h1>
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2">
+                    <form class="form-horizontal" method="post" action="/updateWish">
+                        <input type="hidden" name="id" value="{{ data[0][0] }}">
+                        <!-- Text input-->
+                        <div class="form-group">
+                            <label class="sr-only" for="txtTitle">Title</label>
+                            <div class="col-md-12">
+                                <input id="txtTitle" name="title" type="text" placeholder="Title" class="form-control input-lg" value="{{ data[0][1] }}">
+                            </div>
+                        </div>
+
+                        <!-- Textarea -->
+                        <div class="form-group">
+                            <label class="sr-only" for="txtDescription">Description</label>
+                            <div class="col-md-12">
+                                <textarea class="form-control input-lg" id="txtDescription" name="description" placeholder="Description">{{ data[0][2] }}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Button -->
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <input id="singlebutton" class="btn btn-primary btn-block" type="submit" value="Publish" />
+                            </div>
+                        </div>
+                    </form>
+                    
+                </div>
+            </div>
+        </div>
+        <footer class="footer">
+            <p>&copy; sigidhanafi 2016</p>
+        </footer>
+    </div>
+</body>
+</html>
