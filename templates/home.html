@@ -7,6 +7,7 @@
     <link href="../static/css/font-awesome.css" rel="stylesheet">
     <script type="text/javascript" src="../static/jquery-3.1.1.min.js"></script>
     <script type="text/javascript" src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.js"></script>
 </head>
 <body>
     <div class="container">
@@ -24,24 +25,19 @@
             <h1>{{ name }}</h1>
         </div>
         <div>
-            {% if data|length > 0 %}
-                <ul class="list-group">
-                    {% for row in data %}
-                        <li class="list-group-item">
-                            {{ row[1] }}
-                            <div class="pull-right col-lg-2 text-right">
-                                <a href="#" class="btn-delete" alt="delete" title="delete" id="{{ row[0] }}" data-toggle="modal" data-target="#myModal"><i class="fa fa-trash" aria-hidden="true"></i></a> &nbsp;
-                                <a href="/editWish?id={{ row[0] }}" class="" alt="edit" title="edit"><i class="fa fa-pencil" aria-hidden="true"></i></a> &nbsp;
-                                <a href="/showWish?id={{ row[0] }}" class="" alt="view" title="view"><i class="fa fa-eye" aria-hidden="true"></i></a> &nbsp;
-                            </div>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <div class="alert alert-info" role="alert">
-                    You don't have list items!
-                </div>
-            {% endif %}
+            <div class="alert alert-info message-alert" style="display : none;">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <div id="message-text"></div>
+            </div>
+            <h4>Wish List</h4>
+            <ul class="list-group" id="uncheckedListGroup">
+            </ul>
+            <hr>
+            <h4>History</h4>
+            <ul class="list-group" id="checkedListGroup">
+            </ul>
         </div>
 
         <!-- Modal -->
@@ -73,14 +69,180 @@
 </body>
 <script type="text/javascript">
     $(function(){
-        $(".btn-delete").on('click', function(){
-            var id = $(this).attr("id");
-            $("#wishId").val(id);
-        })
+        getUncheckedWish();
+        getCheckedWish();
 
         $(".btn-yes").on('click', function(){
             $("#deleteWish").submit();
         })
     })
+    function getUncheckedWish(){
+        $.ajax({
+            url: '/getUncheckedWish',
+            type: 'GET',
+            dataType: "json",
+            success: function(response) {
+                if (response.success === true) {
+                    var data = response.data;
+                    $("#uncheckedListGroup").html('');
+                    if (data.length > 0) {
+                        $("#uncheckedListTemplate").tmpl(data).appendTo("#uncheckedListGroup");
+                        $(".checkWish").unbind();
+                        $(".btn-delete").unbind();
+                        $(".btn-delete").on('click', function(){
+                            var id = $(this).attr("id");
+                            $("#wishId").val(id);
+                        })
+                        $(".checkWish").on('change', function(){
+                            var id = $(this).attr('id');
+                            if (this.checked) {
+                                $.ajax({
+                                    url: '/checkWish',
+                                    data: 'id='+id,
+                                    type: 'POST',
+                                    dataType: "json",
+                                    success: function(response) {
+                                        var message = response.message;
+                                        $("#message-text").html(message);
+                                        $(".message-alert").fadeIn(function(){
+                                            setInterval(function(){$(".message-alert").fadeOut()}, 3000);
+                                        });
+                                    },
+                                    error: function(error) {
+                                        console.log(error);
+                                    }
+                                });
+                            }else{
+                                $.ajax({
+                                    url: '/uncheckWish',
+                                    data: 'id='+id,
+                                    type: 'POST',
+                                    dataType: "json",
+                                    success: function(response) {
+                                        var message = response.message;
+                                        $("#message-text").html(message);
+                                        $(".message-alert").fadeIn(function(){
+                                            setInterval(function(){$(".message-alert").fadeOut()}, 3000);
+                                        });
+                                    },
+                                    error: function(error) {
+                                        console.log(error);
+                                    }
+                                });
+                            }
+                            getUncheckedWish();
+                            getCheckedWish();
+                        })
+                    }else{
+                        $("#emptyListTemplate").tmpl(response.message).appendTo("#uncheckedListGroup");
+                    }
+                }
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function getCheckedWish(){
+        $.ajax({
+            url: '/getCheckedWish',
+            type: 'GET',
+            dataType: "json",
+            success: function(response) {
+                if (response.success === true) {
+                    var data = response.data;
+                    $("#checkedListGroup").html('');
+                    if (data.length > 0) {
+                        $("#checkedListTemplate").tmpl(data).appendTo("#checkedListGroup");
+                        $(".checkWish").unbind();
+                        $(".btn-delete").unbind();
+                        $(".btn-delete").on('click', function(){
+                            var id = $(this).attr("id");
+                            $("#wishId").val(id);
+                        })
+                        $(".checkWish").on('change', function(){
+                            var id = $(this).attr('id');
+                            if (this.checked) {
+                                $.ajax({
+                                    url: '/checkWish',
+                                    data: 'id='+id,
+                                    type: 'POST',
+                                    dataType: "json",
+                                    success: function(response) {
+                                        var message = response.message;
+                                        $("#message-text").html(message);
+                                        $(".message-alert").fadeIn(function(){
+                                            setInterval(function(){$(".message-alert").fadeOut()}, 3000);
+                                        });
+                                    },
+                                    error: function(error) {
+                                        console.log(error);
+                                    }
+                                });
+                            }else{
+                                $.ajax({
+                                    url: '/uncheckWish',
+                                    data: 'id='+id,
+                                    type: 'POST',
+                                    dataType: "json",
+                                    success: function(response) {
+                                        var message = response.message;
+                                        $("#message-text").html(message);
+                                        $(".message-alert").fadeIn(function(){
+                                            setInterval(function(){$(".message-alert").fadeOut()}, 3000);
+                                        });
+                                    },
+                                    error: function(error) {
+                                        console.log(error);
+                                    }
+                                });
+                            }
+                            getUncheckedWish();
+                            getCheckedWish();
+                        })
+                    }else{
+                        $("#emptyListTemplate").tmpl(response.message).appendTo("#checkedListGroup");
+                    }
+                }
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    }
+</script>
+<script type="text/x-jQuery-tmpl" id="uncheckedListTemplate">
+    <li class="list-group-item">
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" name="" class="checkWish" id="${id}">
+                ${title}
+            </label>
+            <div class="pull-right col-lg-2 text-right">
+                <a href="#" class="btn-delete" alt="delete" title="delete" id="${id}" data-toggle="modal" data-target="#myModal"><i class="fa fa-trash" aria-hidden="true"></i></a> &nbsp;
+                <a href="/editWish?id=${id}" class="" alt="edit" title="edit"><i class="fa fa-pencil" aria-hidden="true"></i></a> &nbsp;
+                <a href="/showWish?id=${id}" class="" alt="view" title="view"><i class="fa fa-eye" aria-hidden="true"></i></a> &nbsp;
+            </div>
+        </div>
+    </li>
+</script>
+<script type="text/x-jQuery-tmpl" id="checkedListTemplate">
+    <li class="list-group-item">
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" name="" class="checkWish" id="${id}" checked="checked">
+                <del>${title}</del>
+            </label>
+            <div class="pull-right col-lg-2 text-right">
+                <a href="/showWish?id=${id}" class="" alt="view" title="view"><i class="fa fa-eye" aria-hidden="true"></i></a> &nbsp;
+            </div>
+        </div>
+    </li>
+</script>
+<script type="text/x-jQuery-tmpl" id="emptyListTemplate">
+    <div class="alert alert-info" role="alert">
+        You don't have list items!
+    </div>
 </script>
 </html>

@@ -8,9 +8,9 @@ app.secret_key = 'my secret key'
 
 # MySQL configuration
 mysql = MySQL()
-app.config['MYSQL_DATABASE_USER'] = 'db user'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'db password'
-app.config['MYSQL_DATABASE_DB'] = 'db name'
+app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'ffugm'
+app.config['MYSQL_DATABASE_DB'] = 'db_learnpython_bucketlist'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
 
@@ -93,12 +93,18 @@ def home():
 	if session.get('user'):
 		conn = mysql.connect()
 		cursor = conn.cursor()
-		query = "SELECT * FROM wish WHERE user_id = %s"
+		query = "SELECT * FROM wish WHERE user_id = %s AND status = 0"
 		parameter = (session.get('user'))
 		cursor.execute(query, parameter)
-		data = cursor.fetchall()
+		uncheckedWish = cursor.fetchall()
+
+		query = "SELECT * FROM wish WHERE user_id = %s AND status = 1"
+		parameter = (session.get('user'))
+		cursor.execute(query, parameter)
+		checkedWish = cursor.fetchall()
+
 		name = session.get('name')
-		return render_template('home.html', data = data, name = name)
+		return render_template('home.html', uncheckedWish = uncheckedWish, checkedWish = checkedWish, name = name)
 	else:
 		return render_template('error.html', error = 'Unauthorized Access')
 
@@ -213,7 +219,105 @@ def deleteWish():
 		else:
 			return render_template('error.html', error = "Failed to delete wish!")	
 	else:
-		return render_template('error.html', error = "Wish not found!")	
+		return render_template('error.html', error = "Wish not found!")
+
+@app.route('/checkWish', methods = ['POST'])
+def checkWish():
+	_id = request.form['id']
+	_user = session.get('user')
+
+	conn = mysql.connect()
+	cursor = conn.cursor()
+	query = "UPDATE wish SET status = 1 WHERE id = %s AND user_id = %s"
+	parameter = (_id, _user)
+	cursor.execute(query, parameter)
+
+	data = cursor.fetchall()
+	if len(data) is 0:
+		conn.commit()
+		return json.dumps({'message':'Wish checked!'})
+	else:
+		return json.dumps({'message':str(data[0])})
+
+
+@app.route('/uncheckWish', methods = ['POST'])
+def uncheckWish():
+	_id = request.form['id']
+	_user = session.get('user')
+
+	conn = mysql.connect()
+	cursor = conn.cursor()
+	query = "UPDATE wish SET status = 0 WHERE id = %s AND user_id = %s"
+	parameter = (_id, _user)
+	cursor.execute(query, parameter)
+
+	data = cursor.fetchall()
+	if len(data) is 0:
+		conn.commit()
+		return json.dumps({'message':'Wish unchecked!'})
+	else:
+		return json.dumps({'message':str(data[0])})
+
+
+@app.route('/getUncheckedWish')
+def getUncheckedWish():
+	conn = mysql.connect()
+	cursor = conn.cursor()
+	query = "SELECT * FROM wish WHERE user_id = %s AND status = 0"
+	parameter = (session.get('user'))
+	cursor.execute(query, parameter)
+	data = cursor.fetchall()
+
+	if len(data) > 0:
+		uncheckedWish = []
+		for wish in data:
+			wishes = {
+				'id': wish[0],
+				'title':wish[1],
+				'description':wish[2],
+				'user_id':wish[3],
+				'date':wish[4],
+				'status':wish[5],
+			}
+			uncheckedWish.append(wishes)
+
+		return json.dumps({'success':True, 'message':'Success get unchecked wish!', 'data':uncheckedWish})
+	elif len(data) == 0:
+		uncheckedWish = []
+		return json.dumps({'success':True, 'message':'Success get unchecked wish!', 'data':uncheckedWish})
+	else:
+		return json.dumps({'success':False, 'message':'Failed get unchecked wish!'})
+
+@app.route('/getCheckedWish')
+def getCheckedWish():
+	conn = mysql.connect()
+	cursor = conn.cursor()
+	query = "SELECT * FROM wish WHERE user_id = %s AND status = 1"
+	parameter = (session.get('user'))
+	cursor.execute(query, parameter)
+	data = cursor.fetchall()
+
+	if len(data) > 0:
+		checkedWish = []
+		for wish in data:
+			wishes = {
+				'id': wish[0],
+				'title':wish[1],
+				'description':wish[2],
+				'user_id':wish[3],
+				'date':wish[4],
+				'status':wish[5],
+			}
+			checkedWish.append(wishes)
+
+		return json.dumps({'success':True, 'message':'Success get checked wish!', 'data':checkedWish})
+	elif len(data) == 0:
+		checkedWish = []
+		return json.dumps({'success':True, 'message':'Success get unchecked wish!', 'data':checkedWish})
+	else:
+		return json.dumps({'success':False, 'message':'Failed get checked wish!'})
+
+	
 
 
 # run application
